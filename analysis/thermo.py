@@ -10,6 +10,7 @@ import os
 import time
 import openpyxl
 from tqdm import tqdm
+from analysis import main
 
 
 def find_thermo(file, is_thermo_file, no_thermo_file):
@@ -36,6 +37,7 @@ def find_thermo(file, is_thermo_file, no_thermo_file):
     ld = openpyxl.load_workbook(file, read_only=True)  # openpyxl begin [1, 1] and set read only mode
     sheet_name = ld.sheetnames[0]  # get the first sheet by default, and sheet type is list
     sheet_data = ld[sheet_name]    # get data
+    # sheet = ls["sheet0"]
 
     # get header
     sheet_header = []
@@ -67,6 +69,9 @@ def find_thermo(file, is_thermo_file, no_thermo_file):
     # no_thermo_ws.append(sheet_header)
 
     # find thermo str
+    # for row in sheet_data.rows:
+    #     pass
+
     for row in tqdm(sheet_data.rows, desc='processing:', total=sheet_data.max_row):
         strs = row[organism_col_index].value
         data = []
@@ -95,23 +100,6 @@ def find_thermo(file, is_thermo_file, no_thermo_file):
 
 
 if __name__ == '__main__':
-    # file
-    big_data = 'uniprot-had+family+phosphatase.xlsx'
-    test_data = 'test-data.xlsx'
+    args = main.Args()
 
-    # curr dir
-    curr_dir = os.getcwd()            # /analysis-bacterium-temperature/analysis
-    root_dir = os.path.abspath('..')  # /analysis-bacterium-temperature
-    data_dir = os.path.join(root_dir, "data")
-    xlsx_file = os.path.join(data_dir, big_data)
-
-    # git absolute file path and file name suffix
-    file_absolute_dir, file_name_suffix = os.path.splitext(xlsx_file)
-    print(f'dir: {file_absolute_dir}, file: {file_name_suffix}')
-
-    # set new file name
-    is_thermo_xlsx = file_absolute_dir + '+is-thermo' + file_name_suffix
-    no_thermo_xlsx = file_absolute_dir + '+no-thermo' + file_name_suffix
-    print(f'new file: {is_thermo_xlsx}, {no_thermo_xlsx}')
-
-    find_thermo(xlsx_file, is_thermo_xlsx, no_thermo_xlsx)
+    find_thermo(args.xlsx_file, args.is_thermo_xlsx, args.no_thermo_xlsx)
