@@ -3,11 +3,6 @@
 author: yudd
 time  : 2021.9.30
 use   : to read excel file and find thermo key word
-12000 * 1.0 / 60.0 / 60.0
-
-还有两个问题：
-  程序不能停止
-  部分链接会多一个空格
 """
 
 import os
