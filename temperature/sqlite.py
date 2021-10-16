@@ -1,28 +1,37 @@
 # encode=utf-8
 """
-
+use : Establish a database according to the crawled information
 """
 import os
 import sys
 import csv
 import sqlite3
-from analysis import main
+from temperature import args
 
 
 class Sqlite(object):
-    def __init__(self, db):
+    def __init__(self, db, is_create_db=False, insert_data_file=None):
+        # if not create database and db file is not exist -> exit
+        if (not is_create_db) and (not os.path.exists(db)):
+            print(f'database file is not exist.')
+            sys.exit(1)
+        else:
+            print(f'sqlite using -> {db}')
 
-        # check file
-        _db_is_exist = True
-        if not os.path.exists(db):
-            _db_is_exist = False
+        # if want create database and db file is exist -> delete this file first
+        if is_create_db and os.path.exists(db):
+            os.remove(db)
 
         self._db = db
         self.connect = sqlite3.connect(self._db)
         self.cursor = self.connect.cursor()
 
-        if not _db_is_exist:
+        if is_create_db:
             self.create_table()
+            if os.path.exists(insert_data_file):
+                self.executemany(insert_data_file)
+            else:
+                print(f'insert data file is None')
 
     def create_table(self):
         self.cursor.execute('''
@@ -44,6 +53,8 @@ class Sqlite(object):
         if not os.path.exists(file):
             print(f'file not exist: {file}')
             sys.exit(1)
+        else:
+            print(f'sqlite using -> {file}')
 
         # set data
         _data = []
@@ -71,30 +82,32 @@ class Sqlite(object):
         except Exception as e:
             raise Exception(f'select failed: {_sql}\nerror: {e}')
 
+    def get_table_rows_num(self):
+        _sql = f'select count(*) from bacterium;'
+        try:
+            _res = self.cursor.execute(_sql).fetchall()
+            # print(type(_res))
+            print(f'table row number: {_res[0][0]}\n')
+        except Exception as e:
+            raise Exception(f'select failed: {_sql}\nerror: {e}')
+
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.cursor.close()
         self.connect.close()
 
 
 if __name__ == '__main__':
-    args = main.Args()
-    print(f'db: {args.sqlite}')
+    args = args.Args()
 
-    delete = False
-    if delete:
-        os.remove(args.sqlite)
+    # param: bd file; is create a new db: insert data file
+    database = Sqlite(args.sqlite_bacterium_temperature_db, True, args.spider_bacterium_temperature_csv_file)
 
-    database = Sqlite(args.sqlite)
+    # # test select
+    # res = database.select('Marinovum')
+    # # []
+    # # [(12, 'Candidatus Wildermuthbacteria', 'https://webshop.dsmz.de/index.php?lang=1&cl=search&searchparam=Candidatus+Wildermuthbacteria', 'None', 'None')]
+    # print(res)
+    # print(res[0][4])
 
-    # insert data
-    # database.executemany(args.temperature)
+    database.get_table_rows_num()
 
-    # test select
-    res = database.select('Candidatus Wildermuthbacteria')
-    # []
-    # [(12, 'Candidatus Wildermuthbacteria', 'https://webshop.dsmz.de/index.php?lang=1&cl=search&searchparam=Candidatus+Wildermuthbacteria', 'None', 'None')]
-    print(res)
-    print(res[0][4])
-
-    print('ok')
-    pass

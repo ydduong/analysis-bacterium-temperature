@@ -2,15 +2,16 @@
 """
 author: yudd
 time  : 2021.9.30
-use   : to read excel file and find thermo key word
+use   : It is divided into two files according to whether the organization column of the source file contains the thermo keyword
 > https://www.osgeo.cn/openpyxl/optimized.html#read-only-mode
 """
 
 import os
+import sys
 import time
 import openpyxl
 from tqdm import tqdm
-from analysis import main
+from temperature import args
 
 
 def find_thermo(file, is_thermo_file, no_thermo_file):
@@ -23,15 +24,12 @@ def find_thermo(file, is_thermo_file, no_thermo_file):
     :param no_thermo_file: new execl for no thermo key
     :return: none
     """
-
-    # time
-    start_time = time.time()
-
     # check xlsx file
     if os.path.exists(file):
-        print(f'using: {file}')
+        print(f'thermo.py using -> {file}')
     else:
         print(f'{file} is not exist')
+        sys.exit(1)
 
     # read sheet
     ld = openpyxl.load_workbook(file, read_only=True)  # openpyxl begin [1, 1] and set read only mode
@@ -47,17 +45,14 @@ def find_thermo(file, is_thermo_file, no_thermo_file):
             sheet_header.append(item.value)
     print(f'header: {sheet_header}')
 
+    # get sheet row
+    sheet_row_num = 0
+    for _ in sheet_data.rows:
+        sheet_row_num += 1
+
     # get Organism column index
     organism_col_index = sheet_header.index("Organism")
     print(f'organism index: {organism_col_index}')
-
-    # test: print the first 100 rows of data in organism column
-    # num = 0
-    # for row in sheet_data.rows:
-    #     print(row[organism_col_index].value)
-    #     num += 1
-    #     if num == 100:
-    #         break
 
     # create write object and write header
     is_thermo_wb = openpyxl.Workbook(write_only=True)
@@ -68,11 +63,8 @@ def find_thermo(file, is_thermo_file, no_thermo_file):
     no_thermo_ws = no_thermo_wb.create_sheet("sheet0")
     # no_thermo_ws.append(sheet_header)
 
-    # find thermo str
-    # for row in sheet_data.rows:
-    #     pass
-
-    for row in tqdm(sheet_data.rows, desc='processing:', total=sheet_data.max_row):
+    #
+    for row in tqdm(sheet_data.rows, desc='thermo processing:', total=sheet_row_num):
         strs = row[organism_col_index].value
         data = []
         for cell in row:
@@ -92,14 +84,17 @@ def find_thermo(file, is_thermo_file, no_thermo_file):
     # save file
     is_thermo_wb.save(is_thermo_file)
     no_thermo_wb.save(no_thermo_file)
+    print(f'thermo keyword data save to {is_thermo_file}')
+    print(f'no-thermo keyword data save to {no_thermo_file}\n')
 
     # ues read only mode, and need close file
     ld.close()
 
-    print(f'use time is {time.time() - start_time}')
+    time.sleep(1)
 
 
 if __name__ == '__main__':
-    args = main.Args()
+    args = args.Args()
 
-    find_thermo(args.xlsx_file, args.is_thermo_xlsx, args.no_thermo_xlsx)
+    # param: source excel file; save thermo data xlsx; save no thermo data xlsx
+    find_thermo(args.source_xlsx_file, args.is_thermo_source_xlsx_file, args.no_thermo_source_xlsx_file)

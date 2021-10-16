@@ -2,11 +2,13 @@
 """
 author: yudd
 time  : 2021.10.2
-use   : data preprocessing organism name to sqlite
+use   : Clean and de duplicate the original data table without thermo keyword, and save these data
 """
 import os
+import sys
+import time
 import openpyxl
-from analysis import main, thermo
+from temperature import args
 from tqdm import tqdm
 
 
@@ -19,9 +21,10 @@ def preprocessing(file, database_xlsx):
     """
     # check xlsx file
     if os.path.exists(file):
-        print(f'using: {file}')
+        print(f'bacterium using -> {file}')
     else:
         print(f'{file} is not exist')
+        sys.exit(1)
 
     # read sheet
     ld = openpyxl.load_workbook(file, read_only=True)  # openpyxl begin [1, 1] and set read only mode
@@ -36,6 +39,10 @@ def preprocessing(file, database_xlsx):
             sheet_header.append(item.value)
     # print(f'header: {sheet_header}')
 
+    sheet_row_num = 0
+    for _ in sheet_data.rows:
+        sheet_row_num += 1
+
     # get Organism column index
     organism_col_index = sheet_header.index("Organism")
     # print(f'organism index: {organism_col_index}')
@@ -46,7 +53,7 @@ def preprocessing(file, database_xlsx):
 
     # find thermo str
     no_thermo_set = set()
-    for row in tqdm(sheet_data.rows, desc='processing:', total=sheet_data.max_row):
+    for row in tqdm(sheet_data.rows, desc='bacterium processing:', total=sheet_row_num):
         strs = row[organism_col_index].value
 
         # delete sp.
@@ -81,15 +88,19 @@ def preprocessing(file, database_xlsx):
 
     # save file
     database_wb.save(database_xlsx)
+    print(f'bacterium name save to {database_xlsx}\n')
 
     # ues read only mode, and need close file
     ld.close()
 
+    time.sleep(1)
+
 
 if __name__ == '__main__':
-    args = main.Args()
+    args = args.Args()
 
-    preprocessing(args.no_thermo_xlsx, args.database)
+    # param: source xlsx file without thermo keyword; only save bacterium name
+    preprocessing(args.no_thermo_source_xlsx_file, args.no_thermo_bacterium_name_xlsx_file)
 
 
 
