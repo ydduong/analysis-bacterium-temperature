@@ -36,7 +36,7 @@ root/
 - 
 - 同样可以只运行main.py文件，代替上述流程
 
-查询菌种的同源性:
+查询菌种的同源性（homology 项目）:
 
 - 原始数据放在 /data/homology 文件夹下
 - 修改args.py文件，只需要修改变量source_xlsx_file，这是原始的带后缀的文件名
