@@ -13,7 +13,7 @@ root/
 |   |-- homology         # Python project
 |   |   |-- __init__.py
 |   |   |-- args.py      
-|   |   |-- thermo.py
+|   |   |-- spiderFasta.py
 |   |   |-- other
 |   |-- temperature      # Python project
 |   |   |-- __init__.py
@@ -39,9 +39,9 @@ root/
 - 原始数据放在 /data/homology 文件夹下
 - 修改args.py文件，只需要修改变量source_xlsx_file，这是原始的带后缀的文件名
 - 运行spiderFasta.py文件，根据原始数据(经过去重后)去下载Fasta序列，保存到 /data/homology/fasta文件夹下；同时会将下载的文件合并到all-fasta.txt文件中，放在/data/homology文件夹下
-- 手动将all-fasta.txt文件上传到https://www.genome.jp/tools-bin/clustalw，进行同源性查询，将查询结果页保存到/data/homology文件夹下（Ctrl+S，选择html格式）
+- 手动将all-fasta.txt文件上传到[https://www.genome.jp/tools-bin/clustalw](https://www.genome.jp/tools-bin/clustalw)，进行同源性查询，将查询结果页保存到/data/homology文件夹下（Ctrl+S，选择html格式）
 - 运行preprocessingHtml.py文件，对网页数据进行处理（先筛选出必要数据），在对原始表格数据进行处理，生成结果文件
-- -
+- 
 - 关于检验结结果：
-- 运行check-result-homology.py文件，会在/data/homology文件夹下生成一个这些数据的总的Fasta序列集文件，同样上传到https://www.genome.jp/tools-bin/clustalw，进行同源性查询
+- 运行check-result-homology.py文件，会在/data/homology文件夹下生成一个这些数据的总的Fasta序列集文件，同样上传到[https://www.genome.jp/tools-bin/clustalw](https://www.genome.jp/tools-bin/clustalw)，进行同源性查询
 
